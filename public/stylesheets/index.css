@@ -1,0 +1,63 @@
+@import "vendor/bootstrap-grid.min.css";
+@import "vendor/bootstrap.min.css";
+
+#messages-list {
+    max-height: 24rem;
+    overflow: auto;
+}
+
+.message-item {
+    float: left;
+    width: auto;
+    min-width: 60%;
+}
+
+.message-item.author-message {
+    float: right;
+}
+
+.message-item .arrow {
+    width: 14px;
+    height: 14px;
+    position: absolute;
+    left: -7px;
+    top: -1px;
+    background: inherit;
+    border: inherit;
+    transform: skew(40deg);
+    border-width: 1px 0 0 1px;
+}
+
+.message-item.author-message .arrow {
+    left: auto;
+    right: -7px;
+    transform: skew(-40deg);
+}
+
+.chat-input-label {
+    width: 100%;
+}
+
+.chat-input-wrapper {
+}
+
+.chat-input-label {
+    border: 1px solid #ced4da;
+    height: 4rem;
+    display: flex;
+}
+
+.chat-input-label button {
+    height: 75%;
+    margin: 0.45rem;
+}
+
+.chat-input-label .form-control {
+    float: right;
+    font-size: 1rem;
+    border: none;
+}
+
+.chat-input-label .form-control:focus {
+    box-shadow: none;
+}

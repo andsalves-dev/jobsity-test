@@ -1,14 +1,14 @@
 <?php
 
 use App\Kernel;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\HttpFoundation\Request;
 
-require dirname(__DIR__).'/config/bootstrap.php';
+require dirname(__DIR__) . '/config/bootstrap.php';
 
 if ($_SERVER['APP_DEBUG']) {
     umask(0000);
-
     Debug::enable();
 }
 
@@ -20,8 +20,17 @@ if ($trustedHosts = $_SERVER['TRUSTED_HOSTS'] ?? $_ENV['TRUSTED_HOSTS'] ?? false
     Request::setTrustedHosts([$trustedHosts]);
 }
 
-$kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
+$kernel = new Kernel($_SERVER['APP_ENV'], (bool)$_SERVER['APP_DEBUG']);
 $request = Request::createFromGlobals();
-$response = $kernel->handle($request);
-$response->send();
-$kernel->terminate($request, $response);
+
+try {
+    $response = $kernel->handle($request);
+    $response->send();
+    $kernel->terminate($request, $response);
+} catch (Exception $e) {
+    if ($_SERVER['APP_DEBUG']) {
+        print $e->getMessage() . "</br> " . $e->getTraceAsString() . "</br> ";
+    }
+
+    exit('Unexpected error, please try again or contact support.');
+}

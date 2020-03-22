@@ -90,6 +90,9 @@
     "egulias/email-validator": {
         "version": "2.1.17"
     },
+    "firebase/php-jwt": {
+        "version": "v5.1.0"
+    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
@@ -152,6 +155,9 @@
         "files": [
             "config/packages/sensio_framework_extra.yaml"
         ]
+    },
+    "symfony-bundles/json-request-bundle": {
+        "version": "v3.0.0"
     },
     "symfony/asset": {
         "version": "v5.0.5"

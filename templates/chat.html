@@ -1,0 +1,30 @@
+<div id="main-content" class="p-4 p-sm-5" xmlns:v-on="http://www.w3.org/1999/xhtml">
+    <ul id="messages-list" class="list-group p-0 px-sm-5">
+        <li v-for="(message, key) in messages" :key="key" class="w-100 list-unstyled">
+            <div :class="getMessageClass(message)">
+                <span class="arrow"></span>
+                <div class="d-flex w-100 justify-content-between">
+                    <small class="mb-1">{{ getMessageAuthorName(message) }}:</small>
+                    <small>{{ message.time }}</small>
+                </div>
+                <p class="mb-1">
+                    {{ message.text }}
+                </p>
+            </div>
+        </li>
+    </ul>
+    <div class="chat-input-wrapper p-0 px-sm-5 mt-5">
+        <label class="chat-input-label">
+            <input
+                v-on:keyup.enter="sendMessage"
+                v-model="fieldValue"
+                class="form-control"
+                type="text"
+                placeholder="Type your message here"
+            />
+            <button :disabled="!fieldValue" type="button" class="btn btn-primary" v-on:click="sendMessage">
+                Send
+            </button>
+        </label>
+    </div>
+</div>
