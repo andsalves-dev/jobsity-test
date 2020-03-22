@@ -12,10 +12,11 @@ VueJs, Axios, Bootstrap, and moment.js were also used to facilitate UI interacti
 - mysql-server
     - `sudo apt install mysql-server5.7`
        (ubuntu/debian)
-- composer
+- Composer
     - https://linuxize.com/post/how-to-install-and-use-composer-on-ubuntu-18-04/
-- symfony cli
+- Symfony cli
     - https://symfony.com/download
+- Git
 
 #### Steps to install and run:
 
@@ -27,10 +28,12 @@ DATABASE_URL=mysql://root:root@127.0.0.1:3306/jobsity_test?serverVersion=5.7
 
 On terminal, run:
 ```
+git clone https://github.com/andsalves-dev/jobsity-test.git
+cd jobsity-test
 
 composer install                              # Installs php dependencies
 php bin/console doctrine:database:create      # Creates the working database
-php bin/console doctrine:migrations:migrate   # Runs migrations
+php bin/console doctrine:migrations:migrate   # Runs migrations (y)
 ```
 Finally, start the server with
 ```
