@@ -19,18 +19,20 @@ VueJs, Axios, Bootstrap, and moment.js were also used to facilitate UI interacti
 - Git
 
 #### Steps to install and run:
+Close the project:
+```
+git clone https://github.com/andsalves-dev/jobsity-test.git
+cd jobsity-test
+```
 
-First, create a .env.local file, and put an entry for the database config:
+Create a .env.local file, and put an entry for the database config:
 ```
 # For example:
 DATABASE_URL=mysql://root:root@127.0.0.1:3306/jobsity_test?serverVersion=5.7
 ```
 
-On terminal, run:
+Now, run:
 ```
-git clone https://github.com/andsalves-dev/jobsity-test.git
-cd jobsity-test
-
 composer install                              # Installs php dependencies
 php bin/console doctrine:database:create      # Creates the working database
 php bin/console doctrine:migrations:migrate   # Runs migrations (y)
