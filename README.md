@@ -19,7 +19,7 @@ VueJs, Axios, Bootstrap, and moment.js were also used to facilitate UI interacti
 - Git
 
 #### Steps to install and run:
-Close the project:
+Clone the project:
 ```
 git clone https://github.com/andsalves-dev/jobsity-test.git
 cd jobsity-test
