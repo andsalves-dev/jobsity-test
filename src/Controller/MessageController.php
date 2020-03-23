@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Message;
 use App\Factory\MessageFactory;
 use App\Repository\MessageRepository;
-use App\Service\MessageInterpreter;
+use App\Service\MessageInterpreterService;
 use App\Validator\Constraints\MessageConstraints;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class MessageController extends AbstractController {
     /** @var MessageFactory */
     private $messageFactory;
-    /** @var MessageInterpreter */
+    /** @var MessageInterpreterService */
     private $messageInterpreter;
 
     /**
@@ -94,7 +94,7 @@ class MessageController extends AbstractController {
         ], 201);
     }
 
-    public function __construct(MessageFactory $messageFactory, MessageInterpreter $messageInterpreter) {
+    public function __construct(MessageFactory $messageFactory, MessageInterpreterService $messageInterpreter) {
         $this->messageFactory = $messageFactory;
         $this->messageInterpreter = $messageInterpreter;
     }

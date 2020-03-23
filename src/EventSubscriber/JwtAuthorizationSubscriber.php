@@ -49,18 +49,22 @@ class JwtAuthorizationSubscriber implements EventSubscriberInterface {
             throw new AccessDeniedHttpException('Bad jwt auth configuration');
         }
 
-        /** @var \stdClass $payload */
-        $payload = JWT::decode($token, $key, ['HS256']);
-        if ($this->payloadIsInvalid($payload)) throw new \Exception();
+        try {
+            /** @var \stdClass $payload */
+            $payload = JWT::decode($token, $key, ['HS256']);
+            if ($this->payloadIsInvalid($payload)) throw new \Exception();
 
-        $user = $this->entityManager->getRepository(User::class)->findOneBy([
-            'id' => $payload->id,
-            'username' => $payload->username,
-        ]);
+            $user = $this->entityManager->getRepository(User::class)->findOneBy([
+                'id' => $payload->id,
+                'username' => $payload->username,
+            ]);
 
-        if (!$user) throw new AccessDeniedHttpException('Unauthorized');
+            if (!$user) throw new AccessDeniedHttpException('Unauthorized');
 
-        $this->tokenStorage->getToken()->setUser($user);
+            $this->tokenStorage->getToken()->setUser($user);
+        } catch(\DomainException $exception){
+            throw new AccessDeniedHttpException('Unauthorized', $exception);
+        }
     }
 
     private function tokenIsInvalid($token) {

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Bot\Action;
-
 
 use App\Entity\Message;
 use App\Entity\User;

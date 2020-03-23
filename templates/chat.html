@@ -19,7 +19,7 @@
                 v-on:keyup.enter="sendMessage"
                 v-model="fieldValue"
                 class="form-control"
-                type="text"
+                :type="getFieldType"
                 placeholder="Type your message here"
             />
             <button :disabled="!fieldValue" type="button" class="btn btn-primary" v-on:click="sendMessage">

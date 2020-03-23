@@ -32,5 +32,6 @@ try {
         print $e->getMessage() . "</br> " . $e->getTraceAsString() . "</br> ";
     }
 
+    http_response_code(500);
     exit('Unexpected error, please try again or contact support.');
 }

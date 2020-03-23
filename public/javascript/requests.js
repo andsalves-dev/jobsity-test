@@ -8,7 +8,6 @@ function fetchCurrentMessages() {
     }
 
     return axios.get('/api/messages', {params}).catch(function (error) {
-        console.error(error);
         return {
             data: {messages: []},
         };
@@ -22,7 +21,6 @@ function sendMessage(message) {
     }
 
     return axios.post('/api/messages', data).catch(function (error) {
-        console.error(error);
         if (error.response && error.response.data['response_message']) {
             // using response message from api
             return error.response;
@@ -39,4 +37,8 @@ function sendMessage(message) {
             },
         };
     });
+}
+
+function performLogin(data) {
+    return axios.post('/api/auth/login', data);
 }

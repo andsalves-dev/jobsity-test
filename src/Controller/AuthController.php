@@ -3,13 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Traits\CollectionValidationTrait;
 use App\Util\PasswordEncoder;
 use Firebase\JWT\JWT;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -19,6 +19,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  * @Route("/auth")
  */
 class AuthController extends AbstractController {
+    use CollectionValidationTrait;
 
     /**
      * @Route("/login", name="login", methods={"POST"})
@@ -27,12 +28,13 @@ class AuthController extends AbstractController {
      * @return Response
      */
     public function login(Request $request, ValidatorInterface $validator): Response {
-        $this->validateRequest($request, $validator);
+        $data = $request->request->getIterator()->getArrayCopy();
+        $this->validateRequest($data, $validator, $this->getConstraints());
 
         /** @var User $user */
         $user = $this->getDoctrine()->getRepository(User::class)->findOneBy([
-            'username' => $request->request->get('username'),
-            'password' => PasswordEncoder::encode($request->request->get('password')),
+            'username' => $data['username'],
+            'password' => PasswordEncoder::encode($data['password']),
         ]);
 
         if (!$user) {
@@ -41,22 +43,21 @@ class AuthController extends AbstractController {
 
         return $this->json([
             'user' => $user->getClientArrayCopy(),
-            'jwt' => JWT::encode([
-                'id' => $user->getId(),
-                'username' => $user->getUsername(),
-            ], $_ENV['JWT_SECRET_KEY']),
+            'jwt' => $this->createToken($user),
         ]);
     }
 
-    private function validateRequest(Request $request, ValidatorInterface $validator) {
-        $violations = $validator->validate(
-            $request->request->getIterator()->getArrayCopy(),
-            new Collection([ 'username' => [new NotBlank()], 'password' => [new NotBlank()]])
-        );
+    private function getConstraints(): Collection {
+        return new Collection([
+            'username' => new NotBlank(),
+            'password' => new NotBlank(),
+        ]);
+    }
 
-        if ($violations->count()) {
-            $message = $violations->get(0)->getPropertyPath() . ': ' . $violations->get(0)->getMessage();
-            throw new UnprocessableEntityHttpException($message);
-        }
+    private function createToken(User $user): string {
+        return JWT::encode([
+            'id' => $user->getId(),
+            'username' => $user->getUsername(),
+        ], $_ENV['JWT_SECRET_KEY']);
     }
 }
