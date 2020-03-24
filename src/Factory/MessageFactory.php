@@ -5,7 +5,7 @@ namespace App\Factory;
 use App\Entity\Message;
 use App\Entity\User;
 
-class MessageFactory implements EntityFactoryInterface {
+class MessageFactory {
 
     public function create(array $data, User $user) {
         $message = new Message();

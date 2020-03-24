@@ -61,3 +61,21 @@
 .chat-input-label .form-control:focus {
     box-shadow: none;
 }
+
+.helper-btn {
+    float: right;
+    font-size: 0.8125rem;
+}
+
+#commands-list {
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 3rem 2rem;
+    background: white;
+}

@@ -4,16 +4,17 @@ namespace App\Bot\Action;
 
 use App\Entity\Message;
 use App\Entity\Transaction;
+use App\Entity\User;
 use App\Factory\MessageFactory;
 use App\Factory\TransactionFactory;
-use Doctrine\ORM\EntityManagerInterface;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 
 class TransactionAction extends AbstractBotAction {
 
     private static $pattern = "/(.*)(?<action>(deposit|withdrawal|withdraw))(.*)"
-    . "\s(?<amount>(\d+(\.\d{1,2}|)))(\s|)(?<currency>([a-z]{3}))(\,|)(\s*|\s.+)(\?|\.)*$/i";
+    . "\s(?<amount>(\d+(\.\d{1,2}|)))(\s|)(?<currency>(([a-z]{3})|))(\,|)(\s*|\s.+)(\?|\.)*$/i";
 
     /** @var TransactionFactory */
     protected $transactionFactory;
@@ -21,11 +22,11 @@ class TransactionAction extends AbstractBotAction {
     /**
      * @param Message $message
      * @return Message
-     * @throws \Exception
+     * @throws InvalidArgumentException
      */
     public function runAction(Message $message): Message {
         try {
-            $params = $this->extractParams($message->getText());
+            $params = $this->extractParams($message->getText(), $message->getUser());
             $transaction = $this->transactionFactory->create($params, $message->getUser());
 
             $this->entityManager->persist($transaction);
@@ -56,14 +57,16 @@ class TransactionAction extends AbstractBotAction {
         return (bool)preg_match(self::$pattern, $text);
     }
 
-    private function extractParams(string $text) {
+    private function extractParams(string $text, User $user) {
         preg_match(self::$pattern, $text, $matches);
         return [
             'type' => strtolower($matches['action']) === 'deposit'
                 ? Transaction::DEPOSIT_TYPE
                 : Transaction::WITHDRAWAL_TYPE,
             'amount' => floatval($matches['amount']),
-            'amount_currency' => strtoupper($matches['currency'])
+            'amount_currency' => $matches['currency'] !== ''
+                ? strtoupper($matches['currency'])
+                : $user->getDefaultCurrency()
         ];
     }
 

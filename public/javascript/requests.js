@@ -42,3 +42,7 @@ function sendMessage(message) {
 function performLogin(data) {
     return axios.post('/api/auth/login', data);
 }
+
+function performRegister(data) {
+    return axios.post('/api/user', data);
+}

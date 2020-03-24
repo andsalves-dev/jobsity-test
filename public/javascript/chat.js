@@ -12,31 +12,52 @@ Vue.filter('time', function (dateStr) {
 
 if (localStorage.getItem('jwt')) {
     useJwtToken(localStorage.getItem('jwt'));
+}
+
+axios.interceptors.response.use(null, function (error) {
+    if ([401, 403].includes(error.response.status)) {
+        vueApp.isLogged = false;
+        localStorage.removeItem('jwt');
+        axios.defaults.headers.common['Authorization'] = null;
     }
 
-var welcomeMessage = {
-    text: "Welcome! How can I help you?",
-    is_bot: true,
-    date: moment().format(),
-}
+    return Promise.reject(error);
+});
 
-var loginRequiredMessage = {
-    text: 'Authentication required. Please start by typing your username and hit enter.',
-    is_bot: true,
-    date: moment().format(),
-}
-
-var loginFailedMessage = {
-    text: 'Login failed, please check your credentials and try again. Type your password and hit enter:.',
-    is_bot: true,
-    date: moment().format(),
+var buildMessage = function (text, is_bot = true) {
+    return {
+        text,
+        is_bot,
+        date: moment().format(),
+    }
 };
 
-var defaultErrorMessage = {
-    text: 'Sorry, I could not understand your request. Could you please try other keywords?',
-    is_bot: true,
-    date: moment().format(),
-}
+var welcomeMessage = buildMessage("Welcome! How can I help you?");
+
+var loginRequiredMessage = buildMessage(
+    "Authentication required. Type one of the available actions: 'login' or 'register'."
+);
+
+var registerMessages = {
+    name: 'Please type your name:',
+    username: 'Now type your username. Make to not include spaces or special characters:',
+    email: 'Type your email address:',
+    default_currency: 'Type your default currency for operations: (example: USD)',
+    password: 'To finish, provide a password (min. of 4 characters):',
+};
+
+var loginMessages = {
+    username: 'Please type your username:',
+    password: 'Now please type your password:',
+};
+
+var loginFailedMessage = buildMessage(
+    "Login failed, please check your credentials and try again. Type 'login' or 'register' to continue."
+);
+
+var defaultErrorMessage = buildMessage(
+    'Sorry, I could not understand your request. Could you please try other keywords?'
+);
 
 var vueApp = new Vue({
     el: '#main-content',
@@ -54,7 +75,11 @@ var vueApp = new Vue({
                 return message['is_bot'] ? 'Bot' : 'You';
             },
             isLogged: Boolean(getJtwToken()),
-            usernameForLogin: null,
+            isLoggingIn: false,
+            dataForLogin: {},
+            isRegistering: false,
+            dataForRegister: {},
+            showHelper: false,
         };
     },
     methods: {
@@ -63,26 +88,32 @@ var vueApp = new Vue({
 
             if (self.handlePreRecognizedMessage()) {
                 self.fieldValue = '';
+                self.scrollToBottom();
                 return null;
             }
 
-            self.messages.push({
-                text: this.fieldValue,
-                is_bot: false,
-                date: moment().format(),
-            });
-
-            self.scrollToBottom();
-
-            sendMessage(this.fieldValue).then(function (response) {
-                if (!response.data || !response.data['response_message']) {
-                    self.messages.push(defaultErrorMessage);
-                } else {
-                    self.messages.push(response.data['response_message']);
-                }
+            if (self.isLogged) {
+                self.messages.push({
+                    text: this.fieldValue,
+                    is_bot: false,
+                    date: moment().format(),
+                });
 
                 self.scrollToBottom();
-            });
+
+                sendMessage(this.fieldValue).then(function (response) {
+                    if (!response.data || !response.data['response_message']) {
+                        self.messages.push(defaultErrorMessage);
+                    } else {
+                        self.messages.push(response.data['response_message']);
+                    }
+
+                    self.scrollToBottom();
+                });
+            } else {
+                self.messages.push(buildMessage("Invalid command. Try 'login' or 'register'."));
+                self.scrollToBottom();
+            }
 
             self.fieldValue = '';
         },
@@ -95,69 +126,116 @@ var vueApp = new Vue({
         // Specific messages handled or partially handled by the frontend
         handlePreRecognizedMessage() {
             var self = this;
+            var lowerCasedText = String(self.fieldValue).toLowerCase();
 
             switch (true) {
                 // clears the messages list. can be undone by refreshing the page
-                case String(self.fieldValue).toLowerCase() === 'clear':
+                case lowerCasedText === 'clear':
                     Vue.set(self, 'messages', [welcomeMessage]);
                     return true;
                 // empty message: does nothing
                 case !self.fieldValue:
                     return true;
                 // handling login interaction
-                case !self.isLogged && !self.usernameForLogin:
-                    self.setUsername(self.fieldValue);
+                case !self.isLogged && self.isLoggingIn:
+                    self.handleProcess('login');
                     return true;
-                case Boolean(!self.isLogged && self.usernameForLogin):
-                    self.login();
+                case !self.isLogged && self.isRegistering:
+                    self.handleProcess('register');
                     return true;
-                case ['logout', 'quit', 'exit'].includes(String(self.fieldValue).toLowerCase()):
+                case lowerCasedText === 'register':
+                    self.startRegister();
+                    return true;
+                case lowerCasedText === 'login':
+                    self.startLogin();
+                    return true;
+                case self.isLogged && ['logout', 'quit', 'exit'].includes(lowerCasedText):
                     self.logout();
                     return true;
+
             }
 
             return false;
         },
-        setUsername(username) {
-            var self = this;
-            Vue.set(self, 'usernameForLogin', username);
-            self.messages.push({
-                text: username,
-                is_bot: false,
-                date: moment().format(),
-            });
-            self.messages.push({
-                text: 'Now, type your password:',
-                is_bot: true,
-                date: moment().format(),
-            });
-
-            self.scrollToBottom();
+        startLogin() {
+            this.isLoggingIn = true;
+            this.messages.push(buildMessage(loginMessages.username));
         },
-        login() {
-            var self = this;
-            var data = {
-                username: self.usernameForLogin,
-                password: self.fieldValue,
-            };
-            self.usernameForLogin = null;
+        startRegister() {
+            this.isRegistering = true;
+            this.messages.push(buildMessage(registerMessages.name));
+        },
+        handleProcess(process) {
+            if (!['login', 'register'].includes(process)) {
+                return null
+            }
 
-            performLogin(data).then(function (response) {
-                if (response.data['jwt']) {
-                    localStorage.setItem('jwt', response.data['jwt']);
-                    useJwtToken(response.data['jwt']);
-                    Vue.set(self, 'messages', [welcomeMessage]);
-                    self.isLogged = true;
-                    alert('Logged in successfully!');
-                } else {
-                    throw new Error();
+            var processField = process === 'login' ? 'dataForLogin' : 'dataForRegister';
+            var messagesList = process === 'login' ? loginMessages : registerMessages;
+
+            var fields = Object.keys(messagesList);
+            var self = this;
+
+            for (var i = 0; i < fields.length; i++) {
+                if (!self[processField][fields[i]]) {
+                    Vue.set(self[processField], fields[i], self.fieldValue)
+                    self.messages.push(buildMessage(self.fieldValue, false));
+                    fields[i + 1] && self.messages.push(buildMessage(messagesList[fields[i + 1]]));
+                    self.scrollToBottom();
+                    break;
                 }
-            }).catch(function () {
-                Vue.set(self, 'messages', [loginFailedMessage]);
-                self.scrollToBottom();
-            });
+            }
+
+            if (fields.length !== Object.keys(self[processField]).length) {
+                return null;
+            }
+
+            if (process === 'login') {
+                performLogin(self[processField]).then(function (response) {
+                    if (response.data['jwt']) {
+                        localStorage.setItem('jwt', response.data['jwt']);
+                        useJwtToken(response.data['jwt']);
+                        Vue.set(self, 'messages', [welcomeMessage]);
+                        self.isLogged = true;
+                        alert('Logged in successfully!');
+                        self.clearProcesses();
+                    } else {
+                        throw new Error();
+                    }
+                }).catch(function () {
+                    Vue.set(self, 'messages', [loginFailedMessage]);
+                    self.scrollToBottom();
+                    self.clearProcesses();
+                })
+            } else {
+                performRegister(self[processField]).then(function () {
+                    alert('Registered successfully! You can now use your credentials to login.');
+                    self.clearProcesses();
+                    Vue.set(self, 'messages', [loginRequiredMessage]);
+                }).catch(function (error) {
+                    var errorMessage = 'Failed to register. ';
+
+                    if (error.response && error.response.data.message) {
+                        errorMessage += error.response.data.message;
+                    }
+
+                    errorMessage += ". Type 'register' or 'login' to continue.";
+
+                    Vue.set(self, 'messages', [buildMessage(errorMessage)]);
+                    self.scrollToBottom();
+                    self.clearProcesses();
+                });
+            }
+        },
+        clearProcesses() {
+            this.dataForRegister = {};
+            this.isRegistering = false;
+            this.dataForLogin = {};
+            this.isLoggingIn = false;
         },
         logout() {
+            this.isLogged = false;
+            this.clearProcesses()
             localStorage.removeItem('jwt');
             useJwtToken(null);
             alert('Logged out!');
@@ -165,6 +243,7 @@ var vueApp = new Vue({
         }
     },
     created() {
+        document.getElementById('main-content').style.display = 'block';
         var self = this;
 
         if (self.isLogged) {
@@ -184,19 +263,14 @@ var vueApp = new Vue({
     },
     computed: {
         getFieldType() {
-            if (!this.isLogged && this.usernameForLogin) {
+            if (
+                (this.isLoggingIn && this.dataForLogin.username && !this.dataForLogin.password) ||
+                (this.isRegistering && this.dataForRegister.default_currency && !this.dataForRegister.password)
+            ) {
                 return 'password';
             }
 
             return 'text';
         }
     }
-});
-
-axios.interceptors.response.use(null, function (error) {
-    if ([401, 403].includes(error.status)) {
-        return vueApp.isLogged = false;
-    }
-
-    return Promise.reject(error);
 });

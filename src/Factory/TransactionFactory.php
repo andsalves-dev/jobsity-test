@@ -10,7 +10,7 @@ use App\Service\CurrencyExchangeService;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 
-class TransactionFactory implements EntityFactoryInterface {
+class TransactionFactory {
     /** @var UserRepository */
     private $userRepository;
     /** @var CurrencyExchangeService */

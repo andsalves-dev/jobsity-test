@@ -6,6 +6,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\{ExceptionEvent};
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class ExceptionSubscriber implements EventSubscriberInterface {
@@ -20,8 +21,6 @@ class ExceptionSubscriber implements EventSubscriberInterface {
             $response->headers->set('Content-Type', 'application/json');
             $event->setResponse($response);
         }
-
-
     }
 
     public static function getSubscribedEvents() {

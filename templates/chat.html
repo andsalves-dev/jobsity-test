@@ -1,4 +1,4 @@
-<div id="main-content" class="p-4 p-sm-5" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<div id="main-content" class="p-4 p-sm-5" xmlns:v-on="http://www.w3.org/1999/xhtml" style="display: none;">
     <ul id="messages-list" class="list-group p-0 px-sm-5">
         <li v-for="(message, key) in messages" :key="key" class="w-100 list-unstyled">
             <div :class="getMessageClass(message)">
@@ -26,5 +26,62 @@
                 Send
             </button>
         </label>
+        <button class="btn btn-link text-small helper-btn" v-on:click="showHelper = true" v-if="isLogged">
+            (?) see available commands
+        </button>
+    </div>
+    <div id="commands-list" v-if="showHelper">
+        <div class="wrapper">
+
+            <h2>
+                Available Commands
+                <small>
+                    <button class="exit-btn btn btn-link p-0" v-on:click="showHelper = false">
+                        (Close)
+                    </button>
+                </small>
+            </h2>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <strong>Deposit</strong><br/>
+                    <small>Example 1: <code>Deposit 100 USD</code></small><br />
+                    <small>Example 2: <code>Deposit 22.15 BRL</code></small><br />
+                </li>
+                <li class="list-group-item">
+                    <strong>Withdrawal</strong><br/>
+                    <small>Example 1: <code>Withdrawal 100 USD</code></small><br />
+                    <small>Example 2: <code>Withdraw 22.15 BRL</code></small><br />
+                    <small>Example 3: <code>Can I please withdraw 1000 USD?</code></small><br />
+                </li>
+                <li class="list-group-item">
+                    <strong>Currency Exchange</strong><br/>
+                    <small>Example 1: <code>What's 100 USD in BRL</code></small><br />
+                    <small>Example 2: <code>USD to BRL</code></small><br />
+                    <small>Example 3: <code>Convert 100 EUR to USD</code></small><br />
+                </li>
+                <li class="list-group-item">
+                    <strong>Check Available Balance</strong><br/>
+                    <small>Example 1: <code>Check balance</code></small><br />
+                    <small>Example 2: <code>Show balance</code></small><br />
+                    <small>Example 3: <code>Balance</code></small><br />
+                </li>
+                <li class="list-group-item">
+                    <strong>Exit/Logout</strong><br/>
+                    <small>Example 1: <code>Quit</code></small><br />
+                    <small>Example 2: <code>Logout</code></small><br />
+                    <small>Example 3: <code>Exit</code></small><br />
+                </li>
+                <li class="list-group-item">
+                    <strong>Salute the bot</strong><br/>
+                    <small>Example 1: <code>Hi</code></small><br />
+                    <small>Example 2: <code>Hello</code></small><br />
+                    <small>Example 4: <code>Hola</code></small><br />
+                </li>
+                <li class="list-group-item">
+                    <strong>Clear messages list:</strong><br/>
+                    <small>Example 1: <code>clear</code></small><br />
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

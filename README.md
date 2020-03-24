@@ -3,7 +3,8 @@
 
 #### Stack Details
 - PHP Framework Used: Symfony
-  - Other back-end tools/libraries: Composer, Doctrine ORM, JWT Auth
+  - Other back-end tools/libraries: Composer, Doctrine ORM, JWT Auth, Symfony caching...
+  - Currency API: Fixer.io
 - Front-end: A single twig template file is used as entry point. 
 VueJs, Axios, Bootstrap, and moment.js were also used to facilitate UI interactions and integration.
 
@@ -48,6 +49,16 @@ API routes go with the '/api' prefix.
 
 ## Bot commands
 The bot can execute a few tasks, using the following patterns:
+
+#### Register / Login:
+- Once you enter the page, and you're not logged in, the bot will ask you to enter 'register' or 'login'.
+After that, you will be walked through the respective wizard.
+You can use your username and password to login once registered.
+
+Default credentials:
+`username: andsalves, passwd: 123456`
+
+#### For logged user:
 - Deposit an amount - pattern: "Deposit" + numerical amount + currency
   - Examples:
     - Deposit 1000 USD
@@ -59,15 +70,16 @@ The bot can execute a few tasks, using the following patterns:
         - Show balance
         - Check balance
         - Balance
+- Convert an amount between currencies
+    - Examples: 
+      - What's 100 USD in BRL
+      - USD to BRL
+      - Convert 100 EUR to USD
+- Exit/Logout
+  - Run 'Logout', 'Quit' or 'Exit' to perform a logout.
+- Clear messages list:
+  - Type 'clear' to clear the messages.
+  
+*You can also click on '(?) see available commands' link below the text box to see a list of available commands.
 
-You can also interact with 'Hello', 'Hi' and 'Hey there'. 
-
-When the bot can't understand your request, it will request you to recheck your words with "Sorry, I could not understand your request. Could you please try other keywords?".
-
-
-#### Not implemented requisites (as of March 21)
-- Login and register through the bot chat
-  - a jwt login was implemented, but the front-end only uses a static jwt for now,
-    that works for the default user.
-- Currency conversion / currency api integration
-  - Only USD is being accepted for deposits and withdrawals
+Please send me a message if you'd like me to answer any question about the project.

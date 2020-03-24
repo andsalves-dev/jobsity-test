@@ -23,7 +23,7 @@ class JwtAuthorizationSubscriber implements EventSubscriberInterface {
     /** @var TokenStorageInterface */
     private $tokenStorage;
     /** @var array */
-    private $disabledRoutes = ['login', '', 'index', '_wdt'];
+    private $disabledRoutes = ['login', '', 'index', '_wdt', 'user_new'];
 
     public function __construct(TokenStorageInterface $tokenStorage, ManagerRegistry $entityManager) {
         $this->entityManager = $entityManager;
