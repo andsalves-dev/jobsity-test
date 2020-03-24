@@ -39,10 +39,13 @@ php bin/console doctrine:database:create      # Creates the working database
 php bin/console doctrine:migrations:migrate   # Runs migrations (y)
 ```
 Finally, start the server with
-```
-composer start
-```
 
+```symfony server:start --no-tls``` (recommended)
+
+or
+
+```composer start```
+#
 On your browser, access `http://localhost:8000` to check the page.
 
 API routes go with the '/api' prefix.
