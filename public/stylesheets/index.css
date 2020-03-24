@@ -78,4 +78,5 @@
     overflow: auto;
     padding: 3rem 2rem;
     background: white;
+    z-index: 100;
 }
